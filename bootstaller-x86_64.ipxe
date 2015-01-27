@@ -7,6 +7,7 @@ set fedora_root http://mirror.bytemark.co.uk/fedora/linux/releases
 set debian_root http://mirror.bytemark.co.uk/debian/dists
 set centos_root http://mirror.bytemark.co.uk/centos
 set sl_root http://www.mirrorservice.org/sites/ftp.scientificlinux.org/linux/scientific
+set fbsd_root http://img.freebsd.andatche.com/bootstaller
 dhcp
 
 # Standard Scientific Linux Installation Menu
@@ -67,6 +68,13 @@ item --menu debian_preseed testing_ps Debian Testing
 item --menu debian_preseed unstable_ps Debian Unstable (sid)
 item --menu debian_preseed main Return
 
+# Standard/scripted combined FreeBSD Installation Menu
+menu --name fbsd Standard or Scripted FreeBSD Installation from optional Userdata
+item --menu fbsd --gap Select FreeBSD Version to Install
+item --menu fbsd fbsd10 10.1-RELEASE
+item --menu fbsd fbsd9 9.3-RELEASE
+item --menu fbsd main Return
+
 # Main Menu
 menu --name main Brightbox Cloud Bootstaller
 item --menu main
@@ -75,12 +83,14 @@ item --menu main centos CentOS
 item --menu main debian Debian
 item --menu main fedora Fedora
 item --menu main sl Scientific Linux
+item --menu main fbsd FreeBSD
 item --menu main
 item --menu main --gap Automatic Installations 
 item --menu main centos_ks CentOS Kickstart
 item --menu main debian_preseed Debian Preseed
 item --menu main fedora_ks Fedora Kickstart
 item --menu main sl_ks Scientific Linux Kickstart
+item --menu main fbsd FreeBSD
 
 # Start
 :main
@@ -155,6 +165,14 @@ goto debian_preseed_boot
 set version unstable
 goto debian_preseed_boot
 
+:fbsd10
+set version 10.1-RELEASE
+goto fbsd_boot
+
+:fbsd9
+set version 9.3-RELEASE
+goto fbsd_boot
+
 :fedora_boot
 initrd ${fedora_root}/${version}/Fedora/${farch}/os/images/pxeboot/initrd.img
 boot ${fedora_root}/${version}/Fedora/${farch}/os/images/pxeboot/vmlinuz repo=${fedora_root}/${version}/Fedora/${farch}/os/ ${kickstart}
@@ -175,3 +193,7 @@ chain ${debian_root}/${version}/main/installer-${darch}/current/images/netboot/p
 :debian_preseed_boot
 initrd ${debian_root}/${version}/main/installer-${darch}/current/images/netboot/debian-installer/${darch}/initrd.gz
 boot ${debian_root}/${version}/main/installer-${darch}/current/images/netboot/debian-installer/${darch}/linux auto url=${userdata}
+
+:fbsd_boot
+initrd ${fbsd_root}/${darch}/freebsd-bootstaller-${version}-${darch}.img
+boot ${fbsd_root}/memdisk
